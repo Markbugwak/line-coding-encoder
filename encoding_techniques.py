@@ -212,7 +212,7 @@ def plot_all(bits, save=True):
     fig, axes = plt.subplots(n, 1, figsize=(max(13, len(bits) * 1.0), 1.8 * n + 1.5))
     for i, (ax, name) in enumerate(zip(axes, NAMES)):
         draw(ax, bits, name, COLORS[i], bits_top=(i == 0), bits_bottom=(i == n - 1))
-    fig.subplots_adjust(left=0.15, right=0.98, top=0.90, bottom=0.07, hspace=0.55)
+    fig.subplots_adjust(left=0.19, right=0.98, top=0.90, bottom=0.07, hspace=0.55)
     fig.suptitle(f"Digital data -> digital signals     data: {bits}",
                  fontsize=16, fontweight="bold")
     fig.text(0.98, 0.012, "yellow = B8ZS / HDB3 substitution", ha="right",
