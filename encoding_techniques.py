@@ -13,6 +13,7 @@ Run:  python encoding_techniques.py
 Needs: matplotlib  (pip install matplotlib)
 """
 
+import argparse
 import matplotlib.pyplot as plt
 
 HIGH, LOW = 1, -1
@@ -277,5 +278,27 @@ def menu():
             print("  Invalid choice.")
 
 
+def run_cli(bits, scheme=None):
+    if not bits or set(bits) - {"0", "1"}:
+        raise ValueError("bit string must contain only 0 and 1")
+    selected = [scheme] if scheme else NAMES
+    for name in selected:
+        if name not in SCHEMES:
+            raise ValueError(f"unknown scheme: {name}")
+        show_text(bits, name)
+
+def main():
+    parser = argparse.ArgumentParser(description="Encode digital data using eight line-coding techniques.")
+    parser.add_argument("bits", nargs="?", help="input bit string; omit to open the menu")
+    parser.add_argument("-s", "--scheme", choices=NAMES, help="show only one encoding scheme")
+    args = parser.parse_args()
+    if args.bits is None:
+        menu()
+        return
+    try:
+        run_cli(args.bits.replace(" ", ""), args.scheme)
+    except ValueError as exc:
+        parser.error(str(exc))
+
 if __name__ == "__main__":
-    menu()
+    main()
