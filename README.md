@@ -1,6 +1,6 @@
 # Line Coding Encoder
 
-A Python program that converts digital data into digital signal levels using eight line-coding techniques. The existing encoder conventions follow Stallings, *Data and Computer Communications*, Section 5.1.
+A Python program that converts digital data into digital signal levels using eight line-coding techniques. The conventions follow the project's interpretation of Stallings, *Data and Computer Communications* (8th edition), Section 5.1: digital data represented as digital signals.
 
 ## Supported techniques
 
@@ -26,13 +26,21 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+Or run all Python commands explicitly through the environment:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
 ## Interactive menu
 
 ```powershell
 .\.venv\Scripts\python.exe encoding_techniques.py
 ```
 
-## CLI mode
+Enter a binary string, then select one encoding, all encodings, or enter another bit string. Invalid menu input is rejected and prompted again.
+
+## CLI usage
 
 Encode all eight schemes for the sample bit string:
 
@@ -46,19 +54,23 @@ Show only one scheme:
 .\.venv\Scripts\python.exe encoding_techniques.py 01001100011 --scheme Manchester
 ```
 
-NRZ and ternary schemes return one signal level per bit. Manchester schemes return two levels per bit (first half, second half). Levels are printed as `+`, `0`, and `-`.
+The CLI rejects empty or non-binary input. NRZ and ternary schemes return one signal level per bit. Manchester schemes return two levels per bit (first half, second half). Levels are printed as `+`, `0`, and `-`.
 
-## Waveform plot
+## Waveform screenshot
 
-The interactive menu can plot one scheme or all eight together. The combined figure is saved as `all_encodings.png`. Yellow shading marks B8ZS/HDB3 zero substitutions.
+The combined plot shows the eight schemes, with the input bits above the first plot and below the last. B8ZS and HDB3 substitutions are highlighted in yellow.
+
+![All encodings](all_encodings.png)
 
 ## Tests
+
+Run the automated test suite:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-The automated tests check all eight encoders, invalid input, and the documented B8ZS/HDB3 substitution examples.
+Tests cover all eight encoders on the sample input, invalid bit strings, CLI helper selection, and the documented B8ZS/HDB3 substitution examples.
 
 ## Encoding conventions
 
@@ -71,11 +83,14 @@ The automated tests check all eight encoders, invalid input, and the documented 
 - **B8ZS:** eight consecutive zeros become 000VB0VB.
 - **HDB3:** four consecutive zeros become 000V after an odd pulse count, or B00V after an even pulse count.
 
-Initial pulse polarity for AMI-based substitutions is negative. HDB3 pulse counting begins at zero (even).
+Initial pulse polarity for AMI-based substitution examples is negative. HDB3 pulse counting begins at zero (even). The CLI sample and substitution tests use these starting assumptions.
 
 ## Project files
 
 - `encoding_techniques.py` — encoders, plots, interactive menu, and CLI.
 - `tests/test_encoding_techniques.py` — automated tests.
-- `all_encodings.png` — combined waveform plot.
-- `presentation.pptx` — eight-slide presentation with speaker notes.
+- `requirements.txt` — Python dependencies.
+- `.gitignore` — excludes virtual environments, bytecode, and local build files.
+- `all_encodings.png` — combined waveform plot shown above.
+- `presentation.pptx` — eight-slide presentation with speaker notes (inspect-only artifact; CI does not regenerate it).
+- `build_presentation.py` — source used to create the presentation; do not run it during this audit because it overwrites the presentation artifact.
