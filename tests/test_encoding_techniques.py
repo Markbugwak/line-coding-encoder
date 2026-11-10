@@ -1,10 +1,16 @@
 import sys
 from pathlib import Path
+
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import encoding_techniques as enc
 
+
+SAMPLE = "01001100011"
+
+
 def test_all_eight_encoders_sample_input():
-    bits = "01001100011"
     expected = {
         "NRZ-L": [1, -1, 1, 1, -1, -1, 1, 1, 1, -1, -1],
         "NRZI": [-1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1],
@@ -16,23 +22,68 @@ def test_all_eight_encoders_sample_input():
         "HDB3": [0, 1, 0, 0, -1, 1, 0, 0, 0, -1, 1],
     }
     for name, (function, _) in enc.SCHEMES.items():
-        assert function(bits) == expected[name]
+        assert function(SAMPLE) == expected[name]
+
+
+@pytest.mark.parametrize(
+    "bits",
+    [
+        "0",
+        "1",
+        "01",
+        "10",
+        "1010101010",
+        "111111111111",
+        "00000000",
+        "0000000000000000",
+        "10000000000000001",
+        "101000001000000010000000",
+        "0" * 256,
+        "1" * 256,
+        ("01001100011" * 24),
+    ],
+)
+def test_all_eight_encoders_handle_multiple_and_long_inputs(bits):
+    for name, (function, samples_per_bit) in enc.SCHEMES.items():
+        levels = function(bits)
+        assert len(levels) == len(bits) * samples_per_bit, name
+        assert set(levels) <= {-1, 0, 1}, name
+
 
 def test_b8zs_substitution_example():
     assert enc.b8zs("1000000001") == [1, 0, 0, 0, 1, -1, 0, -1, 1, -1]
 
+
+def test_b8zs_replaces_two_consecutive_groups_of_eight_zeros():
+    levels = enc.b8zs("0" * 16)
+    assert levels == [0, 0, 0, -1, 1, 0, 1, -1] + [0, 0, 0, -1, 1, 0, 1, -1]
+
+
 def test_hdb3_substitution_example():
     assert enc.hdb3("1000011000010000") == [1, 0, 0, 0, 1, -1, 1, -1, 0, 0, -1, 1, 0, 0, 0, 1]
 
-def test_invalid_bits_are_rejected_by_cli_helper():
-    import pytest
-    with pytest.raises(ValueError):
-        enc.run_cli("01012")
-    with pytest.raises(ValueError):
-        enc.run_cli("")
+
+def test_hdb3_handles_long_zero_runs_without_changing_length():
+    for count in (4, 8, 16, 64, 256):
+        levels = enc.hdb3("0" * count)
+        assert len(levels) == count
+        assert set(levels) <= {-1, 0, 1}
+        assert any(level != 0 for level in levels)
+
+
+@pytest.mark.parametrize("bad_bits", ["", "01012", "10a01", "  ", "01-01"])
+def test_invalid_bits_are_rejected_by_cli_helper(bad_bits):
+    with pytest.raises(ValueError, match="bit string"):
+        enc.run_cli(bad_bits)
+
 
 def test_cli_helper_accepts_one_scheme(capsys):
     enc.run_cli("1", "NRZ-L")
     output = capsys.readouterr().out
     assert "NRZ-L" in output and "Signal : -" in output
     assert "Manchester" not in output
+
+
+def test_cli_helper_rejects_unknown_scheme():
+    with pytest.raises(ValueError, match="unknown scheme"):
+        enc.run_cli("0101", "unknown")
