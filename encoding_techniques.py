@@ -246,14 +246,18 @@ def show_text(bits, name):
 # ---------------------------------------------------------------- menu
 def get_bits():
     while True:
-        s = input("Enter a bit string (e.g. 01001100011): ").strip().replace(" ", "")
+        s = "".join(input("Enter a bit string (e.g. 01001100011): ").split())
         if s and set(s) <= {"0", "1"}:
             return s
         print("  Invalid: use only 0 and 1.")
 
 
 def menu():
-    bits = get_bits()
+    try:
+        bits = get_bits()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return
     while True:
         print(f"\nCurrent data: {bits}")
         for i, name in enumerate(NAMES, 1):
@@ -261,15 +265,23 @@ def menu():
         print("  9. Show ALL (text + one combined plot)")
         print("  0. Enter new bit string")
         print("  q. Quit")
-        choice = input("Choose: ").strip().lower()
+        try:
+            choice = input("Choose: ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
         if choice == "q":
             break
         if choice == "0":
-            bits = get_bits()
+            try:
+                bits = get_bits()
+            except (EOFError, KeyboardInterrupt):
+                print()
+                break
         elif choice == "9":
             for name in NAMES:
                 show_text(bits, name)
-            plot_all(bits)
+            plot_all(bits, save=False)
         elif choice.isdigit() and 1 <= int(choice) <= len(NAMES):
             name = NAMES[int(choice) - 1]
             show_text(bits, name)
@@ -293,10 +305,12 @@ def main():
     parser.add_argument("-s", "--scheme", choices=NAMES, help="show only one encoding scheme")
     args = parser.parse_args()
     if args.bits is None:
+        if args.scheme is not None:
+            parser.error("bits argument is required when --scheme is specified")
         menu()
         return
     try:
-        run_cli(args.bits.replace(" ", ""), args.scheme)
+        run_cli("".join(args.bits.split()), args.scheme)
     except ValueError as exc:
         parser.error(str(exc))
 

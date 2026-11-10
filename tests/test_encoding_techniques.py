@@ -87,3 +87,39 @@ def test_cli_helper_accepts_one_scheme(capsys):
 def test_cli_helper_rejects_unknown_scheme():
     with pytest.raises(ValueError, match="unknown scheme"):
         enc.run_cli("0101", "unknown")
+
+
+def test_main_requires_bits_when_scheme_is_given(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["encoding_techniques.py", "--scheme", "Manchester"])
+    with pytest.raises(SystemExit) as exc:
+        enc.main()
+    assert exc.value.code == 2
+    assert "bits argument is required" in capsys.readouterr().err
+
+
+def test_main_accepts_spaced_bits(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["encoding_techniques.py", "0100 1100 011", "--scheme", "NRZ-L"])
+    enc.main()
+    output = capsys.readouterr().out
+    assert "NRZ-L" in output
+    assert "+ - + + - - + + + - -" in output
+
+
+def test_menu_show_all_does_not_overwrite_png(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    responses = iter(["01001100011", "9", "q"])
+    monkeypatch.setattr("builtins.input", lambda prompt="": next(responses))
+    monkeypatch.setattr(enc.plt, "show", lambda: None)
+    try:
+        enc.menu()
+    finally:
+        enc.plt.close("all")
+    assert not (tmp_path / "all_encodings.png").exists()
+
+
+def test_menu_exits_cleanly_on_eof(monkeypatch):
+    def raise_eof(prompt=""):
+        raise EOFError
+
+    monkeypatch.setattr("builtins.input", raise_eof)
+    enc.menu()

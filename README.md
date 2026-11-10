@@ -92,6 +92,6 @@ Initial pulse polarity for AMI-based substitution examples is negative. HDB3 pul
 - `requirements.txt` — Python dependencies.
 - `.gitignore` — excludes virtual environments, bytecode, and local build files.
 - `all_encodings.png` — combined waveform plot shown above.
-- `presentation_waveforms_enlarged.pptx` — updated eight-slide presentation with enlarged waveforms and speaker notes (inspect-only artifact; CI does not regenerate it).
-- `build_presentation.py` — source used to create the presentation; do not run it during this audit because it overwrites the presentation artifact.
+- `presentation_waveforms_enlarged.pptx` — final eight-slide presentation with enlarged waveforms, comparison table, and speaker notes.
+- `build_presentation.py` — earlier slide-generation script (`presentation.pptx`, without embedded waveform figures); use `presentation_waveforms_enlarged.pptx` for presenting.
 - `PRESENTATION_DEMO.md` — step-by-step guide for the live demonstration.
