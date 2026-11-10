@@ -70,7 +70,7 @@ Run the automated test suite:
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Tests cover all eight encoders on the sample input, invalid bit strings, CLI helper selection, and the documented B8ZS/HDB3 substitution examples.
+Tests cover all eight encoders across multiple short and long inputs, invalid bit strings, long zero runs, CLI scheme selection, and the documented B8ZS/HDB3 substitution examples.
 
 ## Encoding conventions
 
@@ -94,3 +94,4 @@ Initial pulse polarity for AMI-based substitution examples is negative. HDB3 pul
 - `all_encodings.png` — combined waveform plot shown above.
 - `presentation.pptx` — eight-slide presentation with speaker notes (inspect-only artifact; CI does not regenerate it).
 - `build_presentation.py` — source used to create the presentation; do not run it during this audit because it overwrites the presentation artifact.
+- `PRESENTATION_DEMO.md` — step-by-step guide for the live demonstration.
